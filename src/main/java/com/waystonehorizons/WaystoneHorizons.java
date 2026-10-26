@@ -12,6 +12,8 @@ public final class WaystoneHorizons {
     public WaystoneHorizons(IEventBus modEventBus, ModContainer modContainer) {
         HorizonItems.ITEMS.register(modEventBus);
         modEventBus.addListener(HorizonItems::addCreativeItems);
+        modEventBus.addListener(HorizonItems::modifyComponents);
         modContainer.registerConfig(ModConfig.Type.SERVER, HorizonConfig.SPEC);
+        net.blay09.mods.waystones.api.event.WaystoneTeleportEvent.After.EVENT.register(HorizonCooldowns::afterTeleport);
     }
 }

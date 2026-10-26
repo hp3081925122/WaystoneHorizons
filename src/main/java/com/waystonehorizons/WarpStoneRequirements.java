@@ -1,62 +1,88 @@
 package com.waystonehorizons;
 
+import com.mojang.datafixers.util.Either;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
+import net.blay09.mods.shogi.coercion.Coercion;
+import net.blay09.mods.shogi.context.ShogiContext;
+import net.blay09.mods.shogi.context.executor.EffectExecutor;
+import net.blay09.mods.shogi.effect.ShogiEffect;
 import net.blay09.mods.waystones.api.WaystoneTeleportContext;
-import net.blay09.mods.waystones.api.requirement.WarpRequirement;
 import net.blay09.mods.waystones.config.WaystonesConfig;
-import net.blay09.mods.waystones.requirement.CombinedRequirement;
-import net.blay09.mods.waystones.requirement.CooldownRequirement;
-import net.blay09.mods.waystones.requirement.ExperienceLevelRequirement;
-import net.blay09.mods.waystones.requirement.ExperiencePointsRequirement;
-import net.minecraft.resources.ResourceLocation;
+import net.blay09.mods.waystones.config.rules.WaystonesEffectExecutors;
+import net.blay09.mods.waystones.core.WaystoneTeleportContextImpl;
 import net.minecraft.world.entity.player.Player;
 
 public final class WarpStoneRequirements {
-    public static final ResourceLocation COOLDOWN_KEY = ResourceLocation.fromNamespaceAndPath(WaystoneHorizons.MOD_ID, "warp_stone");
+    private static final ThreadLocal<DiscountSession> ACTIVE = new ThreadLocal<>();
 
     private WarpStoneRequirements() {
     }
 
-    public static WarpRequirement adjust(WaystoneTeleportContext context, WarpRequirement original) {
-        if (!(context.getWarpItem().getItem() instanceof AdvancedWarpStoneItem stone)
+    public static Either<?, ?> resolve(Supplier<? extends Either<?, ?>> resolver, Object value) {
+        if (!(value instanceof WaystoneTeleportContextImpl context)
+                || !(context.getWarpItem().getItem() instanceof AdvancedWarpStoneItem stone)
                 || !(context.getEntity() instanceof Player player)) {
-            return original;
+            return resolver.get();
         }
-
-        List<WarpRequirement> requirements = new ArrayList<>();
-        flatten(original, requirements);
-        int remainingDiscount = stone.getLevelDiscount();
-        for (int index = 0; index < requirements.size(); index++) {
-            if (requirements.get(index) instanceof ExperienceLevelRequirement levels) {
-                int originalLevels = Math.max(0, levels.getLevels());
-                requirements.set(index, new ExperienceLevelRequirement(Math.max(0, originalLevels - remainingDiscount)));
-                remainingDiscount = Math.max(0, remainingDiscount - originalLevels);
+        EffectExecutor originalExecutor = context.executor();
+        DiscountSession previous = ACTIVE.get();
+        DiscountSession session = new DiscountSession();
+        ACTIVE.set(session);
+        try {
+            context.setExecutor(WaystonesEffectExecutors.simulated());
+            session.probing = true;
+            resolver.get();
+            context.setExecutor(originalExecutor);
+            session.probing = false;
+            session.levelsLeft = stone.getLevelDiscount();
+            int unusedLevels = (int) Math.max(0L, stone.getLevelDiscount() - session.totalLevels);
+            session.pointsLeft = experienceValue(player, unusedLevels);
+            Either<?, ?> result = resolver.get();
+            List<Object> information = new ArrayList<>(result.map(Coercion.LIST, Coercion.LIST));
+            boolean failed = result.right().isPresent();
+            if (stone.getCooldownSeconds() > 0 && WaystonesConfig.getActive().rules.enableCooldowns) {
+                information.add(HorizonCooldowns.information(player, stone.getCooldownSeconds()));
+                failed |= HorizonCooldowns.getRemainingMillis(player) > 0;
+            }
+            return failed ? Either.right(information) : Either.left(information);
+        } finally {
+            context.setExecutor(originalExecutor);
+            if (previous == null) {
+                ACTIVE.remove();
+            } else {
+                ACTIVE.set(previous);
             }
         }
-
-        long pointsDiscount = experienceValue(player, remainingDiscount);
-        for (int index = 0; index < requirements.size(); index++) {
-            if (requirements.get(index) instanceof ExperiencePointsRequirement points) {
-                int originalPoints = Math.max(0, points.getPoints());
-                requirements.set(index, new ExperiencePointsRequirement((int) Math.max(0L, originalPoints - pointsDiscount)));
-                pointsDiscount = Math.max(0L, pointsDiscount - originalPoints);
-            }
-        }
-
-        int cooldown = stone.getCooldownSeconds();
-        if (cooldown > 0 && WaystonesConfig.getActive().teleports.enableCooldowns) {
-            requirements.add(new CooldownRequirement(COOLDOWN_KEY, cooldown));
-        }
-        return new CombinedRequirement(requirements);
     }
 
-    private static void flatten(WarpRequirement requirement, List<WarpRequirement> output) {
-        if (requirement instanceof CombinedRequirement combined) {
-            combined.getRequirements().forEach(child -> flatten(child, output));
-        } else {
-            output.add(requirement);
+    public static Object evaluateCost(ShogiEffect<?> expression, Object context, boolean levels, boolean damage) {
+        Either<?, ?> result = expression.apply((ShogiContext) context);
+        DiscountSession session = ACTIVE.get();
+        if (session == null) {
+            return result;
         }
+        return result.mapLeft(value -> {
+            int cost = Coercion.NON_NEGATIVE_INT.apply(value);
+            if (damage) {
+                return 0;
+            }
+            if (session.probing) {
+                if (levels) {
+                    session.totalLevels += cost;
+                }
+                return 0;
+            }
+            if (levels) {
+                int discounted = Math.max(0, cost - session.levelsLeft);
+                session.levelsLeft = Math.max(0, session.levelsLeft - cost);
+                return discounted;
+            }
+            int discounted = (int) Math.max(0L, cost - session.pointsLeft);
+            session.pointsLeft = Math.max(0L, session.pointsLeft - cost);
+            return discounted;
+        });
     }
 
     private static long experienceValue(Player player, int levels) {
@@ -74,5 +100,12 @@ public final class WarpStoneRequirements {
             return 112L + (level - 30L) * 9L;
         }
         return level >= 15 ? 37L + (level - 15L) * 5L : 7L + level * 2L;
+    }
+
+    private static final class DiscountSession {
+        private boolean probing;
+        private long totalLevels;
+        private int levelsLeft;
+        private long pointsLeft;
     }
 }

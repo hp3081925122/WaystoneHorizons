@@ -1,18 +1,15 @@
 // 当前文件只保留最小的 NeoForge 开发、构建和运行配置。
 plugins {
     id 'java-library'
-    id 'eclipse'
-    id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.1.37'
+    id 'net.neoforged.moddev' version '2.0.140'
 }
 
-version = project.mod_version
-group = project.mod_group_id
-
 repositories {
-    mavenLocal()
-    maven { url = 'https://maven.neoforged.net/releases' }
+    maven {
+        url = 'https://maven.twelveiterations.com/repository/maven-public/'
+        content { includeGroup 'net.blay09.mods' }
+    }
     maven {
         url = 'https://www.cursemaven.com'
         content {
@@ -21,56 +18,86 @@ repositories {
     }
 }
 
+version = project.mod_version
+group = project.mod_group_id
+
 base {
-    archivesName = "neoforge-${project.minecraft_version}-${project.mod_name.replace(' ', '')}"
+    archivesName = 'neoforge-26.1.2-WaystoneHorizons'
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
-runs {
-    configureEach {
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
-        systemProperty 'forge.logging.console.level', 'debug'
-        modSource project.sourceSets.main
+neoForge {
+    version = project.neo_version
+
+    runs {
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        gameTestServer {
+            type = 'gameTestServer'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        data {
+            data()
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
     }
 
-    client {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-    }
-
-    server {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        programArgument '--nogui'
-    }
-
-    gameTestServer {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-    }
-
-    data {
-        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    mods {
+        "${project.mod_id}" {
+            sourceSet(sourceSets.main)
+        }
     }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-// 服务端集成测试仅在显式启用时编译，不进入正式构建。
 if (providers.gradleProperty('withGameTests').isPresent()) {
     sourceSets.main.java.srcDir 'src/gametest/java'
     sourceSets.main.resources.srcDir 'src/gametest/resources'
 }
 
-// 即使手动带测试属性打包，也不把测试类与测试结构发布出去。
+def dedicatedServerRun = gradle.startParameter.taskNames.any {
+    it.tokenize(':').last() in ['runServer', 'runGameTestServer']
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${project.neo_version}"
+    implementation 'curse.maven:waystones-245755:8837358'
+    implementation 'curse.maven:balm-531761:8969765'
+    implementation 'curse.maven:shogi-1475746:8978486'
+    compileOnly 'net.blay09.mods:shogi-api:26.1.2.12'
+    // 保留模板客户端辅助依赖，专用服务端只保留编译引用。
+    ['curse.maven:jei-238222:8771077',
+     'curse.maven:just-enough-characters-250702:8413185',
+     'curse.maven:jade-324717:8651070',
+     'curse.maven:advanced-loot-info-1205426:8169069'].each { coordinate ->
+        if (dedicatedServerRun) {
+            compileOnly coordinate
+        } else {
+            implementation coordinate
+        }
+    }
+}
+
 tasks.named('jar', Jar).configure {
     exclude 'com/waystonehorizons/gametest/**'
     exclude 'data/waystonehorizons/structure/gametest/**'
-}
-
-// 前置同时加入编译和运行环境，成品不内嵌前置。
-dependencies {
-    implementation "net.neoforged:neoforge:${project.neo_version}"
-    implementation "curse.maven:waystones-245755:${project.waystones_file_id}"
-    implementation "curse.maven:balm-531761:${project.balm_file_id}"
 }
 
 tasks.withType(ProcessResources).configureEach {
@@ -85,9 +112,7 @@ tasks.withType(ProcessResources).configureEach {
             mod_license: project.mod_license,
             mod_version: project.mod_version,
             mod_authors: project.mod_authors,
-            mod_description: project.mod_description,
-            waystones_version_range: project.waystones_version_range,
-            balm_version_range: project.balm_version_range
+            mod_description: project.mod_description
     ]
     inputs.properties replaceProperties
 
@@ -110,5 +135,6 @@ publishing {
 }
 
 tasks.withType(JavaCompile).configureEach {
+    options.release = 25
     options.encoding = 'UTF-8'
 }

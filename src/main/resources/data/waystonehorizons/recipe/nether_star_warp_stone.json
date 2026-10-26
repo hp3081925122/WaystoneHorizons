@@ -7,15 +7,9 @@
     "APA"
   ],
   "key": {
-    "C": {
-      "item": "minecraft:nether_star"
-    },
-    "A": {
-      "item": "minecraft:amethyst_shard"
-    },
-    "P": {
-      "item": "minecraft:ender_pearl"
-    }
+    "C": "minecraft:nether_star",
+    "A": "minecraft:amethyst_shard",
+    "P": "minecraft:ender_pearl"
   },
   "result": {
     "id": "waystonehorizons:nether_star_warp_stone",
