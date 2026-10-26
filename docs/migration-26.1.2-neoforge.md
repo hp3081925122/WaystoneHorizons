@@ -72,4 +72,13 @@
 - 证据目录：D:\AI临时文件\WaystoneHorizons-2612-migration\render-preview-output\20261026-235211-101908；启动日志render-preview-client.log，四项汇总render-preview-captures-summary.json位于本次迁移临时目录。
 - 此次为无世界静态物品展示，未实测第一人称持握动画、库存界面和世界内交互；测试客户端已正常关闭。
 - 实现已提交246b1d0并经系统现有代理推送至2612neoforge，最终验证记录继续提交同一分支。独立工作树路径遵循用户约定。
-- 当前26.1.2成品已验证，尚未上传CF；此次明确上传的是已完成的1.20.1 Forge成品9334669，发布记录已推送1201forge/3cd644d。
+- 当前26.1.2成品已验证，并按后续指示上传CF，文件9334833。此前1.20.1 Forge成品9334669的发布记录已推送1201forge/3cd644d。
+
+## CurseForge发布
+
+- 正式成品未经重编译，SHA256保持不变。
+- 官方API返回HTTP200和文件9334833，版本名26.1.2-neoforge-WaystoneHorizons-0.0.1。
+- 已实时核对标签：26.1.2、NeoForge、Java25、Client、Server；Release且审核通过后自动发布。
+- 必需依赖Waystones、Balm、Shogi均已声明。
+- 已查询新文件公开链接，当前工具无法访问，未据此认定Approved；不重复上传。
+- 上传回执：D:\AI临时文件\WaystoneHorizons-release-2612-0.0.1\upload-receipt.json。

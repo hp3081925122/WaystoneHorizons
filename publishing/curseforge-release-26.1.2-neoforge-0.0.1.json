@@ -1,0 +1,42 @@
+{
+  "projectId": 1767339,
+  "projectSlug": "waystone-horizons",
+  "fileId": 9334833,
+  "fileUrl": "https://www.curseforge.com/minecraft/mc-mods/waystone-horizons/files/9334833",
+  "version": "0.0.1",
+  "displayName": "26.1.2-neoforge-WaystoneHorizons-0.0.1",
+  "minecraft": "26.1.2",
+  "loader": "NeoForge",
+  "java": "25",
+  "sha256": "004c5e7dfb8a5dc51048840a521449441d2daed5dd30d2455021f0666713d5a2",
+  "bytes": 25626,
+  "uploadedAt": "2026-10-26T23:58:18.062145+08:00",
+  "state": "API accepted; processing/review status not confirmed",
+  "releaseType": "Release",
+  "gameVersions": [
+    16082,
+    10150,
+    14454,
+    9638,
+    9639
+  ],
+  "requiredDependencies": [
+    {
+      "slug": "waystones",
+      "projectID": 245755,
+      "type": "requiredDependency"
+    },
+    {
+      "slug": "balm",
+      "projectID": 531761,
+      "type": "requiredDependency"
+    },
+    {
+      "slug": "shogi",
+      "projectID": 1475746,
+      "type": "requiredDependency"
+    }
+  ],
+  "scriptPath": "D:\\AI临时文件\\WaystoneHorizons-release-2612-0.0.1\\publish_cf.py",
+  "receiptPath": "D:\\AI临时文件\\WaystoneHorizons-release-2612-0.0.1\\upload-receipt.json"
+}

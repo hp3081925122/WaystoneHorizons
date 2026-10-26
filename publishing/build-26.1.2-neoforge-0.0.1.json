@@ -8,8 +8,8 @@
   "fileName": "neoforge-26.1.2-WaystoneHorizons-0.0.1.jar",
   "bytes": 25626,
   "sha256": "004C5E7DFB8A5DC51048840A521449441D2DAED5DD30D2455021F0666713D5A2",
-  "state": "Validated, not uploaded",
-  "uploaded": false,
+  "state": "Uploaded; accepted by CurseForge API",
+  "uploaded": true,
   "requiredDependencies": [
     {
       "projectId": 245755,
@@ -31,5 +31,7 @@
     }
   ],
   "serverTests": "2 required tests passed, including 1 addon integration test",
-  "clientTests": "3 addon item renders and 1 upstream reference, fixed offline context"
+  "clientTests": "3 addon item renders and 1 upstream reference, fixed offline context",
+  "fileId": 9334833,
+  "fileUrl": "https://www.curseforge.com/minecraft/mc-mods/waystone-horizons/files/9334833"
 }
