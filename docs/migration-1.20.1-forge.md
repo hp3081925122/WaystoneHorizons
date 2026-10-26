@@ -42,13 +42,13 @@
 - [x] 主实现、配方、标签、贴图、本地化与配置完整迁移。
 - [x] 编译与构建通过。
 - [x] 逐项复核是否存在实现简化，发现后补齐。
-- [ ] 代码完整后，交由子代理完成服务端功能回归。
-- [ ] 代码完整后，交由子代理使用 Render Preview 完成客户端与渲染对照。
-- [ ] 确认最终 JAR 无测试类、无前置模组打包，记录 Git 提交及远程分支。
+- [x] 代码完整后，交由子代理完成服务端功能回归。
+- [x] 代码完整后，交由子代理使用 Render Preview 完成客户端与渲染对照。
+- [x] 确认最终 JAR 无测试类、无前置模组打包，记录 Git 提交及远程分支。
 
 ## 当前状态
 
-代码、资源和文档迁移完成，已通过编译与 reobf 构建，正在进行子代理服务端和客户端验收。
+代码、资源和文档迁移完成，编译、reobf 构建、子代理服务端集成测试及 Render Preview 固定展示渲染验收均已通过。
 
 ## 代码迁移阶段
 
@@ -68,4 +68,32 @@
 - 已修复复核发现的两处差异：创造模式越过冷却检查、充能音效使用 PORTAL_TRIGGER。冷却仍在成功传送后记入，创造模式耐久沿用原版豁免；等级收费遵循目标上游原生计算。
 - 耐久附魔在 1.20.1 通过 EnchantmentCategory.BREAKABLE 和 canBeDepleted 判断，使用目标机制保留，不加入仅 1.21 原版识别的耐久附魔标签。三张纹理逐字节一致；源新版传送石本就恒定附魔闪光，目标保留。
 - `compileJava`、带 GameTest 的编译、`build -PwithGameTests` 均成功，生产 JAR 已 reobf；无测试类、测试结构或前置模组类打包，含三配方和三配方解锁进度。
-- 首次服务端启动被 JEC 4.6.11 引用纯客户端 SuffixArray 类阻断，实际测试数为 0，即便 Gradle 退出 0 也不记成功。现保留模板四项辅助依赖，专用服务端任务只将它们作为 compileOnly，客户端开发任务继续正常加载；第二次服务端测试进行中。
+- 首次服务端启动被 JEC 4.6.11 引用纯客户端 SuffixArray 类阻断，实际测试数为 0，即便 Gradle 退出 0 也不记成功。现保留模板四项辅助依赖，专用服务端任务只将它们作为 compileOnly，客户端开发任务继续正常加载；该启动环境问题已解决。
+
+## 服务端验收结果
+
+- 子代理在完整迁移与构建后执行 `gradlew.bat runGameTestServer -PwithGameTests --console plain`，使用 Java 17。
+- 第二次已进入 GameTest，但 Forge 的 PlayerList 对原版 GameTestHelper 空网络通道调用 pipeline，导致测试玩家初始化失败。测试改用 ServerPlayer + Connection + Netty EmbeddedChannel，再执行真实 placeNewPlayer；新增英文异常诊断。该测试环境适配不进入生产 JAR。
+- 第三次确认实际运行 1 项综合 GameTest，结果 `1 GAME TESTS COMPLETE`、`All 1 required tests passed :)`，Gradle 退出码 0。
+- 测试内部覆盖三档界面预测与服务端费用一致、最低 0、0 级真实免费传送不赠送经验、费用不足拒绝、150/60/30 秒及自定义/0/总开关、换档冷却拦截、原石隔离、创造模式冷却豁免、主副手来源锁定、失效来源拒绝、工作台配方、锻造模板和完整 NBT 继承、防火、128 耐久和实际损耗、耐久开关、未激活目标拒绝、三档实际到达目标与扣费。
+- 实际运行以 1 个 GameTest 计数，日志不逐条输出内部断言通过信息。
+- 完整证据：`D:\AI临时文件\WaystoneHorizons-1201-migration\gametest-run-3.log`。
+
+## 成品与远程
+
+- 仓库：<https://github.com/hp3081925122/WaystoneHorizons>，公开。
+- `main` 保存 1.21.1 NeoForge 基线提交 b6efffc；`1201forge` 实现迁移提交 25f6788，已通过系统现有代理推送。
+- 成品：`build/libs/forge-1.20.1-WaystoneHorizons-0.0.1.jar`，29,963 字节。
+- SHA-256：`1A9833A944BAC1B443B7812DF03AF6E3FB7FE0CE4A86A6EAA7ABC8E89ED87BFB`。
+- `gradle.properties` 中中文说明采用标准 Unicode 转义，已解包验证最终 mods.toml 文本为正确 UTF-8，避免 Java Properties 默认编码导致乱码。
+- JAR 仅含本附属类与资源，52 个目录/文件条目，三配方、三解锁进度，无测试类、测试结构或前置类。
+
+## 客户端与渲染验收结果
+
+- 子代理在指定 `Render Preview/1.20.1-forge-render-preview` 工作区，通过外部临时 Gradle init 接入最终生产 JAR 与 Waystones 14.1.21、Balm 7.3.44，Forge 47.4.23 / Java 17。未修改预览器或本项目跟踪源码。
+- Minecraft 客户端成功加载所有依赖、附属和 Mixin；物品目录含全部三个注册条目。
+- 实际使用 Minecraft ItemRenderer 的 FIXED 展示分别渲染三档物品，以及 Waystones 原版 warp_stone 作为参考，四张图片均为 1024×1024。
+- 四者轮廓与包围框一致（287,261 到 764,814），前景像素 190668 或 190670；三档只有预期色板变化，未出现缺失贴图、洋红缺失像素、模型解析或材质错误。
+- 本次预览为 `server=false, worldAttached=false`，验证范围是固定展示；没有进入真实世界，不能据此声称手持、背包界面及客户端传送菜单交互已实测。
+- 截图和诊断 JSON：`D:\AI临时文件\WaystoneHorizons-1201-migration\render-output\20261026-232459-122292\render_{diamond_warp_stone,netherite_warp_stone,nether_star_warp_stone,waystones_reference}.{png,json}`。
+- 客户端启动日志：`D:\AI临时文件\WaystoneHorizons-1201-migration\render-preview-client.log`。测试结束后已正常关闭该客户端。
