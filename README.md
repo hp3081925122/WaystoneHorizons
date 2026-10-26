@@ -56,3 +56,5 @@ $env:JAVA_HOME = 'C:\Users\30819\.jdks\jdk-25.0.4+7'
 `src/gametest` 仅在 `-PwithGameTests` 时参与开发编译，正式JAR排除测试类与结构。测试使用26.1.2的注册式GameTest入口；服务端已由子代理实际运行并通过2项必需测试，其中1项为本附属综合回归。
 
 [迁移与验证记录](docs/migration-26.1.2-neoforge.md) · [依赖记录](docs/dependencies.md)
+
+客户端已由子代理使用26.1.2 Render Preview验证三档静态物品渲染：与原版轮廓一致，没有缺失贴图。未实测第一人称持握、库存界面和世界内交互。

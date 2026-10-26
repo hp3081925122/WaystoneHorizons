@@ -1,0 +1,1 @@
+本目录保留跨版本发布记录。curseforge-release-0.0.1.json 是已上传的1.21.1 NeoForge记录；curseforge-release-1.20.1-forge-0.0.1.json是本次上传文件9334669的记录。build-26.1.2-neoforge-0.0.1.json是当前分支已验证的成品清单，该成品尚未上传CF。

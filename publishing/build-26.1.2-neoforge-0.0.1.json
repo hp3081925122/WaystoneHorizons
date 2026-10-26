@@ -1,0 +1,35 @@
+{
+  "projectName": "Waystone Horizons",
+  "projectId": 1767339,
+  "version": "0.0.1",
+  "minecraft": "26.1.2",
+  "loader": "NeoForge",
+  "java": "25",
+  "fileName": "neoforge-26.1.2-WaystoneHorizons-0.0.1.jar",
+  "bytes": 25626,
+  "sha256": "004C5E7DFB8A5DC51048840A521449441D2DAED5DD30D2455021F0666713D5A2",
+  "state": "Validated, not uploaded",
+  "uploaded": false,
+  "requiredDependencies": [
+    {
+      "projectId": 245755,
+      "fileId": 8837358,
+      "version": "26.1.2.16",
+      "slug": "waystones"
+    },
+    {
+      "projectId": 531761,
+      "fileId": 8969765,
+      "version": "26.1.2.15",
+      "slug": "balm"
+    },
+    {
+      "projectId": 1475746,
+      "fileId": 8978486,
+      "version": "26.1.2.12",
+      "slug": "shogi"
+    }
+  ],
+  "serverTests": "2 required tests passed, including 1 addon integration test",
+  "clientTests": "3 addon item renders and 1 upstream reference, fixed offline context"
+}
