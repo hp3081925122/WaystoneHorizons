@@ -1,18 +1,13 @@
-// 当前文件只保留最小的 NeoForge 开发、构建和运行配置。
+// 当前文件只保留最小的 Forge 开发、构建和运行配置。
 plugins {
-    id 'java-library'
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.1.37'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
 }
 
-version = project.mod_version
-group = project.mod_group_id
-
 repositories {
-    mavenLocal()
-    maven { url = 'https://maven.neoforged.net/releases' }
     maven {
         url = 'https://www.cursemaven.com'
         content {
@@ -21,90 +16,132 @@ repositories {
     }
 }
 
+version = project.mod_version
+group = project.mod_group_id
+
 base {
-    archivesName = "neoforge-${project.minecraft_version}-${project.mod_name.replace(' ', '')}"
+    archivesName = 'forge-1.20.1-WaystoneHorizons'
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
-runs {
-    configureEach {
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
-        systemProperty 'forge.logging.console.level', 'debug'
-        modSource project.sourceSets.main
-    }
+minecraft {
+    mappings channel: project.mapping_channel, version: project.mapping_version
+    copyIdeResources = true
 
-    client {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-    }
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
 
-    server {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        programArgument '--nogui'
-    }
+            mods {
+                "${project.mod_id}" {
+                    source sourceSets.main
+                }
+            }
+        }
 
-    gameTestServer {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-    }
+        client {
+            property 'forge.enabledGameTestNamespaces', project.mod_id
+        }
 
-    data {
-        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        server {
+            args '--nogui'
+        }
+
+        gameTestServer {
+            property 'forge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        data {
+            workingDirectory project.file('run-data')
+            args '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+        }
     }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-// 服务端集成测试仅在显式启用时编译，不进入正式构建。
 if (providers.gradleProperty('withGameTests').isPresent()) {
     sourceSets.main.java.srcDir 'src/gametest/java'
     sourceSets.main.resources.srcDir 'src/gametest/resources'
 }
 
-// 即使手动带测试属性打包，也不把测试类与测试结构发布出去。
-tasks.named('jar', Jar).configure {
-    exclude 'com/waystonehorizons/gametest/**'
-    exclude 'data/waystonehorizons/structure/gametest/**'
+mixin {
+    add sourceSets.main, 'waystonehorizons.refmap.json'
+    config 'waystonehorizons.mixins.json'
 }
 
-// 前置同时加入编译和运行环境，成品不内嵌前置。
+def dedicatedServerRun = gradle.startParameter.taskNames.any {
+    it.tokenize(':').last() in ['runServer', 'runGameTestServer']
+}
+
 dependencies {
-    implementation "net.neoforged:neoforge:${project.neo_version}"
-    implementation "curse.maven:waystones-245755:${project.waystones_file_id}"
-    implementation "curse.maven:balm-531761:${project.balm_file_id}"
+    minecraft "net.minecraftforge:forge:${project.minecraft_version}-${project.forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    implementation fg.deobf('curse.maven:waystones-245755:8849482')
+    implementation fg.deobf('curse.maven:balm-531761:8969708')
+    // 保留模板的客户端辅助依赖，专用服务端只编译引用，避免加载客户端类。
+    ['curse.maven:jei-238222:8778011',
+     'curse.maven:just-enough-characters-250702:8771525',
+     'curse.maven:jade-324717:8479276',
+     'curse.maven:advanced-loot-info-1205426:7451552'].each { coordinate ->
+        if (dedicatedServerRun) {
+            compileOnly fg.deobf(coordinate)
+        } else {
+            implementation fg.deobf(coordinate)
+        }
+    }
 }
 
-tasks.withType(ProcessResources).configureEach {
+tasks.named('processResources', ProcessResources).configure {
     def replaceProperties = [
             minecraft_version: project.minecraft_version,
             minecraft_version_range: project.minecraft_version_range,
-            neo_version: project.neo_version,
-            neo_version_range: project.neo_version_range,
+            forge_version: project.forge_version,
+            forge_version_range: project.forge_version_range,
             loader_version_range: project.loader_version_range,
             mod_id: project.mod_id,
             mod_name: project.mod_name,
             mod_license: project.mod_license,
             mod_version: project.mod_version,
             mod_authors: project.mod_authors,
-            mod_description: project.mod_description,
-            waystones_version_range: project.waystones_version_range,
-            balm_version_range: project.balm_version_range
+            mod_description: project.mod_description
     ]
     inputs.properties replaceProperties
 
-    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
     }
+}
+
+tasks.named('jar', Jar).configure {
+    exclude 'com/waystonehorizons/gametest/**'
+    exclude 'data/waystonehorizons/structures/gametest/**'
+    manifest {
+        attributes([
+                'MixinConfigs': 'waystonehorizons.mixins.json',
+                'Specification-Title': project.mod_id,
+                'Specification-Vendor': project.mod_authors,
+                'Specification-Version': '1',
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.jar.archiveVersion,
+                'Implementation-Vendor': project.mod_authors
+        ])
+    }
+    finalizedBy 'reobfJar'
 }
 
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            from components.java
+            artifact jar
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            url "file://${project.projectDir}/mcmodsrepo"
         }
     }
 }

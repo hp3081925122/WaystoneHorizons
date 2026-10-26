@@ -1,80 +1,60 @@
 # Waystone Horizons · 跃石远境
 
-Waystones 的附属模组，扩展手持传送石（Warp Stone）的种类、冷却与经验减免。
+Waystones 的附属模组，新增三种保留原版轮廓的手持传送石。
 
-| 物品 | 默认冷却 | 传送经验减免 | 合成方式 |
+| 物品 | 默认冷却 | 经验减免 | 配方 |
 | --- | --- | --- | --- |
-| 钻石传送石 | 150 秒 | 1 级 | 四角紫水晶碎片、四边末影珍珠、中心钻石 |
-| 下界合金传送石 | 60 秒 | 2 级 | 锻造台：下界合金升级锻造模板 + 钻石传送石 + 下界合金锭 |
-| 下界之星传送石 | 30 秒 | 3 级 | 四角紫水晶碎片、四边末影珍珠、中心下界之星 |
+| 钻石传送石 | 150 秒 | 1 级 | 四角紫水晶碎片，四边末影珍珠，中心钻石 |
+| 下界合金传送石 | 60 秒 | 2 级 | 下界合金升级锻造模板 + 钻石传送石 + 下界合金锭 |
+| 下界之星传送石 | 30 秒 | 3 级 | 四角紫水晶碎片，四边末影珍珠，中心下界之星 |
 
-保留 Waystones 原有蓄力、受伤打断、粒子、目标选择、传送限制及耐久机制。下界合金升级继承基底的名称、附魔、耐久等组件；下界合金传送石本身防火。
+费用为 `max(0, Waystones 原等级费用 - 减免等级)`，不会增加经验。Waystones 14.1.21 本身只按等级收费；界面显示和服务端实际扣费共用计算入口。普通传送石、传送卷轴、背包按钮与传送方块的费用保持上游行为。
 
-三种物品贴图均以 Waystones 原始传送石的 16×16 贴图为基础，仅替换七色色板；原始透明区域、黑色描边、像素坐标及内部明暗分区全部保留。
+三档物品共用独立的玩家冷却组，换物品不能绕过冷却，普通传送石不受此组影响。冷却记录随玩家保存，重进世界、跨维度和死亡重生后会同步。传送失败不会启动冷却或消耗耐久。
 
-## 冷却与经验
+继承上游蓄力时长、持握动作、各阶段粒子、受伤打断及传送限制，沿用上游目标选择界面与传送实现。菜单绑定打开时实际使用的手和物品，双手持有不同档位时按所选物品计费，期间换掉物品会使菜单失效。保留 128 点耐久、成功传送消耗 1 点耐久、附魔光效和耐久条；下界合金传送石防火，锻造继承名称、附魔、耐久及其他完整 NBT。
 
-配置文件为存档中的 `serverconfig/waystonehorizons-server.toml`，服务器配置会同步到客户端：
+三张纹理直接保留 1.21.1 版本的原版传送石换色贴图，透明区域、黑色描边及像素位置均一致。
+
+## 配置
+
+存档 `serverconfig/waystonehorizons-server.toml`，服务器配置会同步给客户端：
 
 ```toml
+enableCooldowns = true
+enableDurability = true
+
 [cooldowns]
 diamond = 150
 netherite = 60
 nether_star = 30
 ```
 
-单位是秒，允许范围 `0..2147483647`，设为 `0` 时该物品无附属冷却。三种传送石共享玩家冷却组，使用时按本次物品的配置启动冷却，换另一种传送石不能绕过已存在的冷却。Waystones 总开关 `enableCooldowns=false` 同样停用附属冷却。独立于原传送石和背包按钮冷却组。
-
-等级收费采用 `max(0, 原费用 - 减免等级)`。Waystones 21.1.46 默认使用经验点收费，此时按玩家当前等级和经验条进度折算相应等级的经验价值，再从点数费用中扣除；等级不足减免量时，以减免等级为折算基准。等级、经验点同时收费时，先减等级费用，再将剩余减免额度用于经验点费用，避免重复优惠。所有结果最低为 0，免单不会返还或增加经验。
-
-例如玩家为 10 级、经验条为空时，三种物品分别减免 25、48、69 个经验点。若 Waystones 原费不足减免量，则免费。传送界面和服务端扣费使用同一计算入口；Waystones 自定义的其他物品费用及限制继续生效。
+冷却单位为秒，范围 `0..2147483647`，单项设为 0 即无附属冷却。旧版 Waystones 没有新版的全局冷却与耐久开关，因此本附属提供对应的 `enableCooldowns`、`enableDurability`。Waystones 自身的原石冷却设置继续只作用于原物品。
 
 ## 开发环境
 
 | 项目 | 版本 |
 | --- | --- |
-| Minecraft | 1.21.1 |
-| NeoForge | 21.1.233 |
-| Java | 21 |
-| 模组版本 | 0.0.1 |
-| 模组 ID | `waystonehorizons` |
-| Java 包 | `com.waystonehorizons` |
-| Waystones | 21.1.46 |
-| Balm | 21.0.66 |
+| Minecraft | 1.20.1 |
+| Forge | 47.4.23 |
+| Java | 17 |
+| Waystones | 14.1.21 |
+| Balm | 7.3.44 |
+| 本模组 | 0.0.1 |
 
-目录遵循 `项目名字/模组加载器-mc版本-项目名字`，本工作区为 `WaystoneHorizons/neoforge-1.21.1-WaystoneHorizons`。
-
-## 构建与运行
-
-在此目录打开 PowerShell：
+工作树为 `WaystoneHorizons/forge-1.20.1-WaystoneHorizons`，分支 `1201forge`；`main` 为 1.21.1 NeoForge 基线。
 
 ```powershell
-$env:JAVA_HOME = 'C:\Users\30819\.jdks\ms-21.0.11'
+$env:JAVA_HOME = 'C:\Users\30819\.jdks\ms-17.0.18'
 .\gradlew.bat build
 .\gradlew.bat runClient
 .\gradlew.bat runServer
-```
-
-三个 Gradle 命令分别用于构建、启动开发客户端和启动开发服务端，按需单独执行。首次服务端启动需要自行阅读并接受 Minecraft EULA。
-
-成品输出到 `build/libs/neoforge-1.21.1-WaystoneHorizons-0.0.1.jar`。
-
-Gradle 沿用本机 `127.0.0.1:7892` 代理；移到其他电脑时按当地环境修改 `gradle.properties`。
-
-## 前置依赖
-
-Waystones 和 Balm 通过 CurseMaven 加入编译及开发运行环境，均在 `neoforge.mods.toml` 中声明为客户端与服务端必装。前置不会被打入本模组的 JAR，正式使用时需单独安装。
-
-- [Waystones 21.1.46，NeoForge 1.21.1](https://www.curseforge.com/minecraft/mc-mods/waystones/files/8969751)
-- [Balm 21.0.66，NeoForge 1.21.1](https://www.curseforge.com/minecraft/mc-mods/balm/files/8969738)
-- [依赖与源码核对记录](docs/dependencies.md)
-
-## 服务端集成测试
-
-`src/gametest` 包含回归测试与独立空结构，仅在显式传入属性时参与开发编译：
-
-```powershell
 .\gradlew.bat runGameTestServer -PwithGameTests
 ```
 
-测试覆盖三种费用减免、费用非负、零费用不加经验、经验点与等级混合收费、配置冷却、零冷却、总开关、跨物品冷却拦截、原物品行为保持、三张配方、锻造组件继承及实际传送扣费。正式 `build` 不包含测试类和结构。
+正式构建输出 `build/libs/forge-1.20.1-WaystoneHorizons-0.0.1.jar`。Waystones 与 Balm 使用 CurseMaven；JEI、JEC、Jade、ALI 为模板保留的开发辅助依赖，不写入必需前置列表，也不打包到成品中。
+
+`src/gametest` 仅在显式指定 `-PwithGameTests` 时参与编译；正式 JAR 排除测试类和结构。测试覆盖三档减免及实际传送、费用非负、共享冷却与原石隔离、配置与开关、主副手菜单绑定、未激活目标拒绝、完整配方及锻造 NBT 继承、耐久与防火。
+
+[迁移记录](docs/migration-1.20.1-forge.md) · [依赖与源码记录](docs/dependencies.md)

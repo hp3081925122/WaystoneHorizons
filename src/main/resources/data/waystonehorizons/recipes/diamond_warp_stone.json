@@ -8,7 +8,7 @@
   ],
   "key": {
     "C": {
-      "item": "minecraft:nether_star"
+      "item": "minecraft:diamond"
     },
     "A": {
       "item": "minecraft:amethyst_shard"
@@ -18,7 +18,7 @@
     }
   },
   "result": {
-    "id": "waystonehorizons:nether_star_warp_stone",
+    "item": "waystonehorizons:diamond_warp_stone",
     "count": 1
   }
 }

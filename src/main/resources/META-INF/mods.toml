@@ -9,33 +9,30 @@ displayName="${mod_name}"
 authors="${mod_authors}"
 description='''${mod_description}'''
 
-[[mixins]]
-config="waystonehorizons.mixins.json"
+[[dependencies.${mod_id}]]
+modId="forge"
+mandatory=true
+versionRange="${forge_version_range}"
+ordering="NONE"
+side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="waystones"
-type="required"
-versionRange="${waystones_version_range}"
+mandatory=true
+versionRange="[14.1.21,)"
 ordering="AFTER"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="balm"
-type="required"
-versionRange="${balm_version_range}"
+mandatory=true
+versionRange="[7.3.28,)"
 ordering="AFTER"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
-modId="neoforge"
-type="required"
-versionRange="${neo_version_range}"
-ordering="NONE"
-side="BOTH"
-
-[[dependencies.${mod_id}]]
 modId="minecraft"
-type="required"
+mandatory=true
 versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"

@@ -10,7 +10,7 @@
     "item": "minecraft:netherite_ingot"
   },
   "result": {
-    "id": "waystonehorizons:netherite_warp_stone",
+    "item": "waystonehorizons:netherite_warp_stone",
     "count": 1
   }
 }
