@@ -1,0 +1,6 @@
+{
+  "textures": {
+    "layer0": "waystonehorizons:item/diamond_warp_stone"
+  },
+  "parent": "minecraft:item/handheld"
+}

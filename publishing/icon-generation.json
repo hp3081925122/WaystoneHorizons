@@ -1,0 +1,6 @@
+{
+  "mode": "Built-in image_gen",
+  "reference": "https://media.forgecdn.net/avatars/thumbnails/1107/108/256/256/638657104456838765.png",
+  "output": "E:\\模组\\发cf的模组\\WaystoneHorizons\\publishing\\curseforge-icon.png",
+  "prompt": "Edit the provided icon into a square CurseForge addon project icon. Keep the exact original Waystones gray stone pillar, its carved white runes, its pixel-art/isometric style, and its blue gradient background. Preserve the original pillar design with no redesign or added objects. Give the pillar enough space in the upper 75 percent by scaling its existing composition slightly smaller if necessary. At the very bottom add the exact project name \"Waystone Horizons\" in two centered lines: first line \"Waystone\", second line \"Horizons\". Use clean bold highly legible white lettering with a thin dark blue shadow, clearly separated from and entirely below the stone pillar, with generous safe margins. All text must be spelled exactly, no additional words. Output a polished square 1024x1024 icon suitable for use as a mod project avatar. This is an addon identity, retain the reference art and simply add the project name underneath."
+}

@@ -1,0 +1,7 @@
+{
+  "item.waystonehorizons.diamond_warp_stone": "钻石传送石",
+  "item.waystonehorizons.netherite_warp_stone": "下界合金传送石",
+  "item.waystonehorizons.nether_star_warp_stone": "下界之星传送石",
+  "tooltip.waystonehorizons.cooldown": "使用冷却：%s 秒",
+  "tooltip.waystonehorizons.level_discount": "传送经验消耗减少 %s 级，最低为 0"
+}

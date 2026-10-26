@@ -1,0 +1,24 @@
+# 编辑器本地配置。
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# 构建缓存、产物与开发存档。
+.gradle/
+**/build/
+out/
+bin/
+repo/
+run/
+runs/
+logs/
+
+# 临时文件与崩溃日志。
+*.log
+*.tmp
+hs_err_pid*
+replay_pid*
+Thumbs.db
+.DS_Store

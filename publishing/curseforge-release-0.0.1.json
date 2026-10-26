@@ -1,0 +1,39 @@
+{
+  "projectName": "Waystone Horizons",
+  "projectId": 1767339,
+  "projectSlug": "waystone-horizons",
+  "projectUrl": "https://www.curseforge.com/minecraft/mc-mods/waystone-horizons",
+  "authorUrl": "https://authors.curseforge.com/#/projects/1767339/files",
+  "fileId": 9334046,
+  "fileUrl": "https://www.curseforge.com/minecraft/mc-mods/waystone-horizons/files/9334046",
+  "version": "0.0.1",
+  "displayName": "1.21.1-neoforge-WaystoneHorizons-0.0.1",
+  "minecraft": "1.21.1",
+  "loader": "NeoForge",
+  "java": "21",
+  "environments": [
+    "Client",
+    "Server"
+  ],
+  "requiredDependencies": [
+    {
+      "slug": "waystones",
+      "projectId": 245755
+    },
+    {
+      "slug": "balm",
+      "projectId": 531761
+    }
+  ],
+  "sha256": "867de42590bf4910451559ff73c6aebf4c9474a61b36173edaa2e977ddf0da9a",
+  "uploadedAt": "2026-10-26T22:56:23.984328+08:00",
+  "observedStatus": "Processing",
+  "releaseType": "Release",
+  "observedDate": "2026-10-26",
+  "scriptPath": "D:\\AI临时文件\\WaystoneHorizons-release-0.0.1-recolor\\publish_cf.py",
+  "receiptPath": "D:\\AI临时文件\\WaystoneHorizons-release-0.0.1-recolor\\upload-receipt.json",
+  "proofPath": "D:\\AI临时文件\\WaystoneHorizons-release-0.0.1-recolor\\replacement-upload-status.png",
+  "replacedFileId": 9333827,
+  "replacedFileStatus": "Permanently deleted after explicit confirmation",
+  "replacementReason": "Use original Warp Stone silhouette with palette-only recolors"
+}

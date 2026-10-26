@@ -1,0 +1,7 @@
+{
+  "item.waystonehorizons.diamond_warp_stone": "Diamond Warp Stone",
+  "item.waystonehorizons.netherite_warp_stone": "Netherite Warp Stone",
+  "item.waystonehorizons.nether_star_warp_stone": "Nether Star Warp Stone",
+  "tooltip.waystonehorizons.cooldown": "Use cooldown: %s seconds",
+  "tooltip.waystonehorizons.level_discount": "Reduces teleport experience cost by %s levels, to a minimum of 0"
+}

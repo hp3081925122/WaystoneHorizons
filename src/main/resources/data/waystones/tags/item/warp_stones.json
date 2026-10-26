@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "waystonehorizons:diamond_warp_stone",
+    "waystonehorizons:netherite_warp_stone",
+    "waystonehorizons:nether_star_warp_stone"
+  ]
+}
